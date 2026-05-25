@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>⚾ 甲子園クイズ道場</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;700;900&family=Noto+Sans+JP:wght@400;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<script src="https://pecpec37-gift.github.io/portal/stamp.js"></script>
+<style>
+:root{
+  --bg:#0a1628;--bg2:#0e1f3a;--bg3:#132649;
+  --surface:#152a4a;--surface2:#1e3a5f;
+  --border:rgba(59,130,246,0.2);
+  --blue:#2563eb;--blue2:#60a5fa;--blue3:#bfdbfe;
+  --gold:#f59e0b;--gold2:#fde68a;
+  --green:#10b981;--red:#ef4444;
+  --dirt:#c8a882;--grass:#2d6a4f;
+  --text:#e8f4fd;--text2:rgba(232,244,253,0.7);--text3:rgba(232,244,253,0.4);
+  --radius:6px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at 20% 0%,rgba(37,99,235,0.1) 0%,transparent 50%),radial-gradient(ellipse at 80% 100%,rgba(245,158,11,0.06) 0%,transparent 50%);pointer-events:none;z-index:0;}
+
+.screen{display:none;position:relative;z-index:1;}
+.screen.active{display:block;}
+
+/* TOP */
+#screen-top{min-height:100vh;}
+.top-hero{background:linear-gradient(160deg,#0e2a4a 0%,#0a1628 55%,#060e1a 100%);padding:52px 24px 44px;text-align:center;border-bottom:1px solid var(--border);position:relative;overflow:hidden;}
+.top-hero::before{content:'⚾';position:absolute;right:-20px;bottom:-30px;font-size:200px;opacity:0.04;pointer-events:none;}
+.top-hero::after{content:'🏆';position:absolute;left:10px;top:10px;font-size:100px;opacity:0.035;pointer-events:none;}
+.top-eyebrow{font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:0.22em;color:var(--blue2);text-transform:uppercase;margin-bottom:12px;}
+.top-title{font-family:'Zen Kaku Gothic New',sans-serif;font-weight:900;font-size:clamp(34px,7vw,62px);line-height:1.1;color:var(--text);margin-bottom:8px;}
+.top-title span{color:var(--gold2);}
+.top-sub{font-size:13px;color:var(--text2);letter-spacing:0.06em;margin-bottom:28px;}
+.top-rule{display:inline-block;background:rgba(37,99,235,0.08);border:1px solid rgba(37,99,235,0.22);border-radius:6px;padding:14px 20px;text-align:left;font-size:12px;line-height:2;color:var(--text2);}
+.top-rule strong{color:var(--blue3);}
+
+.genres-wrap{max-width:900px;margin:0 auto;padding:32px 20px 20px;}
+.genres-label{font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:0.2em;color:var(--text3);text-transform:uppercase;margin-bottom:16px;display:flex;align-items:center;gap:10px;}
+.genres-label::after{content:'';flex:1;height:1px;background:var(--border);}
+.genres-hint{font-size:12px;color:var(--gold2);background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.2);border-radius:4px;padding:8px 14px;margin-bottom:20px;text-align:center;letter-spacing:0.04em;}
+.genres-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px;margin-bottom:24px;}
+.genre-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px 18px;cursor:pointer;transition:transform 0.12s,box-shadow 0.12s,border-color 0.12s;position:relative;overflow:hidden;}
+.genre-card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(37,99,235,0.08),transparent);opacity:0;transition:opacity 0.15s;}
+.genre-card:hover{transform:translateY(-3px);box-shadow:0 10px 30px rgba(0,0,0,0.5);border-color:rgba(96,165,250,0.5);}
+.genre-card:hover::before{opacity:1;}
+.genre-accent{position:absolute;top:0;left:0;right:0;height:3px;border-radius:6px 6px 0 0;}
+.genre-icon{font-size:30px;line-height:1;margin-bottom:8px;display:block;}
+.genre-name{font-family:'Zen Kaku Gothic New',sans-serif;font-weight:900;font-size:16px;margin-bottom:4px;color:var(--text);}
+.genre-desc{font-size:11px;color:var(--text3);margin-bottom:4px;line-height:1.6;}
+.genre-count{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text3);letter-spacing:0.1em;}
+.genre-start{position:absolute;top:14px;right:14px;font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:0.1em;color:var(--blue2);opacity:0;transition:opacity 0.15s;}
+.genre-card:hover .genre-start{opacity:1;}
+
+.ranking-btn-wrap{text-align:center;padding:8px 0 36px;}
+.ranking-btn{font-family:'Share Tech Mono',monospace;font-size:11px;letter-spacing:0.12em;padding:10px 24px;background:none;border:1px solid var(--border);color:var(--text3);border-radius:3px;cursor:pointer;transition:all 0.15s;}
+.ranking-btn:hover{border-color:var(--gold2);color:var(--gold2);}
+
+/* INTRO */
+#screen-intro{min-height:100vh;display:none;flex-direction:column;align-items:center;justify-content:center;padding:40px 24px;}
+#screen-intro.active{display:flex;}
+.intro-box{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:32px 28px;width:100%;max-width:420px;text-align:center;}
+.intro-icon{font-size:52px;margin-bottom:10px;display:block;}
+.intro-name{font-family:'Zen Kaku Gothic New',sans-serif;font-weight:900;font-size:24px;margin-bottom:4px;color:var(--gold2);}
+.intro-desc{font-size:12px;color:var(--text3);margin-bottom:20px;line-height:1.7;}
+.intro-rule{font-size:12px;line-height:1.9;color:var(--text2);text-align:left;background:rgba(37,99,235,0.07);border-radius:6px;padding:12px 14px;margin-bottom:20px;}
+.intro-rule strong{color:var(--blue3);}
+.name-label{font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:0.18em;color:var(--text3);text-transform:uppercase;margin-bottom:6px;text-align:left;}
+.name-input{width:100%;background:var(--bg2);border:1px solid var(--border);border-radius:6px;padding:10px 14px;color:var(--text);font-family:'Noto Sans JP',sans-serif;font-size:14px;margin-bottom:16px;outline:none;transition:border-color 0.15s;}
+.name-input:focus{border-color:var(--blue2);}
+.name-input::placeholder{color:var(--text3);}
+.start-btn{width:100%;padding:14px;background:var(--blue);color:white;font-family:'Zen Kaku Gothic New',sans-serif;font-weight:900;font-size:16px;border:none;border-radius:6px;cursor:pointer;transition:background 0.15s,transform 0.1s;letter-spacing:0.04em;}
+.start-btn:hover{background:#1d4ed8;}
+.start-btn:active{transform:scale(0.98);}
+.back-link{margin-top:14px;font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--text3);cursor:pointer;transition:color 0.15s;background:none;border:none;}
+.back-link:hover{color:var(--text);}
+
+/* QUIZ */
+#screen-quiz{min-height:100vh;}
+.quiz-header{background:var(--bg2);border-bottom:1px solid var(--border);padding:12px 20px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;position:sticky;top:0;z-index:10;}
+.quiz-progress{flex:1;height:3px;background:rgba(37,99,235,0.15);border-radius:2px;overflow:hidden;min-width:60px;}
+.quiz-progress-fill{height:100%;background:linear-gradient(90deg,var(--blue),var(--blue2));border-radius:2px;transition:width 0.3s;}
+.quiz-qnum{font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--text3);white-space:nowrap;letter-spacing:0.08em;}
+.quiz-score{font-family:'Share Tech Mono',monospace;font-size:13px;color:var(--gold2);white-space:nowrap;}
+.quiz-timer-wrap{display:flex;align-items:center;gap:5px;}
+.quiz-timer{font-family:'Zen Kaku Gothic New',sans-serif;font-weight:900;font-size:22px;color:var(--gold2);min-width:40px;text-align:right;transition:color 0.3s;}
+.quiz-timer.danger{color:#ef4444;animation:pulse 0.5s infinite alternate;}
+@keyframes pulse{from{opacity:1;}to{opacity:0.5;}}
+.quiz-timer-label{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text3);letter-spacing:0.1em;}
+
+.quiz-body{max-width:640px;margin:0 auto;padding:28px 20px 40px;}
+.quiz-type-badge{font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:0.16em;padding:3px 10px;border-radius:3px;display:inline-block;margin-bottom:14px;text-transform:uppercase;}
+.quiz-type-badge.type-4{background:rgba(37,99,235,0.15);color:var(--blue2);}
+.quiz-type-badge.type-ox{background:rgba(16,185,129,0.15);color:#34d399;}
+.quiz-q{font-family:'Zen Kaku Gothic New',sans-serif;font-weight:700;font-size:clamp(16px,4vw,20px);line-height:1.65;margin-bottom:22px;color:var(--text);}
+.choices{display:flex;flex-direction:column;gap:10px;}
+.choice-btn{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 18px;text-align:left;font-family:'Noto Sans JP',sans-serif;font-size:14px;color:var(--text);cursor:pointer;transition:all 0.12s;display:flex;align-items:center;gap:12px;}
+.choice-btn:hover:not(:disabled){background:var(--surface2);border-color:rgba(96,165,250,0.5);transform:translateX(4px);}
+.choice-btn:disabled{cursor:default;}
+.choice-btn.correct{background:rgba(16,185,129,0.15);border-color:#10b981;color:#34d399;}
+.choice-btn.wrong{background:rgba(239,68,68,0.12);border-color:#ef4444;color:#f87171;}
+.choice-label{font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--text3);min-width:20px;}
+.ox-choices{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.ox-btn{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:28px 16px;font-size:38px;cursor:pointer;transition:all 0.12s;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:6px;}
+.ox-btn span{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text3);letter-spacing:0.1em;}
+.ox-btn:hover:not(:disabled){transform:scale(1.03);border-color:rgba(96,165,250,0.5);}
+.ox-btn:disabled{cursor:default;}
+.ox-btn.correct{background:rgba(16,185,129,0.15);border-color:#10b981;}
+.ox-btn.wrong{background:rgba(239,68,68,0.12);border-color:#ef4444;}
+
+.feedback-bar{margin-top:14px;padding:12px 16px;border-radius:6px;font-size:13px;font-weight:700;opacity:0;transition:opacity 0.2s;min-height:44px;}
+.feedback-bar.show{opacity:1;}
+.feedback-bar.ok{background:rgba(16,185,129,0.12);color:#34d399;border:1px solid rgba(16,185,129,0.3);}
+.feedback-bar.ng{background:rgba(239,68,68,0.1);color:#f87171;border:1px solid rgba(239,68,68,0.25);}
+.next-btn{margin-top:14px;width:100%;padding:12px;background:var(--blue);color:white;font-family:'Zen Kaku Gothic New',sans-serif;font-weight:900;font-size:15px;border:none;border-radius:6px;cursor:pointer;transition:background 0.15s;display:none;}
+.next-btn.show{display:block;}
+.next-btn:hover{background:#1d4ed8;}
+
+/* RESULT */
+#screen-result{min-height:100vh;display:none;flex-direction:column;align-items:center;padding:40px 20px 60px;}
+#screen-result.active{display:flex;}
+.result-box{width:100%;max-width:520px;}
+.result-genre{font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:0.2em;color:var(--text3);text-transform:uppercase;margin-bottom:8px;text-align:center;}
+.result-score-wrap{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:28px;text-align:center;margin-bottom:20px;}
+.result-medal{font-size:48px;margin-bottom:8px;display:block;}
+.result-score{font-family:'Zen Kaku Gothic New',sans-serif;font-weight:900;font-size:64px;line-height:1;color:var(--gold2);}
+.result-score-label{font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:0.16em;color:var(--text3);margin-bottom:16px;text-transform:uppercase;}
+.result-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:16px;}
+.result-stat{background:var(--bg2);border-radius:6px;padding:12px 8px;text-align:center;}
+.result-stat-val{font-family:'Zen Kaku Gothic New',sans-serif;font-weight:900;font-size:24px;color:var(--blue2);}
+.result-stat-val.green{color:#34d399;}
+.result-stat-val.gold{color:var(--gold2);}
+.result-stat-label{font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:0.1em;color:var(--text3);margin-top:2px;}
+.result-actions{display:flex;gap:10px;margin-bottom:24px;}
+.result-btn{flex:1;padding:12px;font-family:'Zen Kaku Gothic New',sans-serif;font-weight:700;font-size:14px;border-radius:6px;cursor:pointer;transition:all 0.15s;}
+.result-btn-primary{background:var(--blue);color:white;border:none;}
+.result-btn-primary:hover{background:#1d4ed8;}
+.result-btn-secondary{background:none;color:var(--text2);border:1px solid var(--border);}
+.result-btn-secondary:hover{border-color:var(--blue2);color:var(--blue2);}
+
+.wrong-section{width:100%;max-width:520px;}
+.wrong-label{font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:0.18em;color:var(--text3);text-transform:uppercase;margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--border);}
+.wrong-item{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:16px;margin-bottom:10px;}
+.wrong-item-num{font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:0.14em;color:var(--text3);margin-bottom:6px;}
+.wrong-item-q{font-size:14px;line-height:1.6;color:var(--text);margin-bottom:10px;font-weight:700;}
+.wrong-item-ans{display:flex;align-items:flex-start;gap:8px;font-size:13px;}
+.wrong-item-ans-label{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--green);background:rgba(16,185,129,0.12);padding:2px 7px;border-radius:2px;white-space:nowrap;margin-top:1px;}
+.wrong-item-ans-text{color:#34d399;line-height:1.5;}
+.portal-back{display:block;text-align:center;margin-top:28px;font-family:'Share Tech Mono',monospace;font-size:12px;letter-spacing:0.1em;color:var(--text3);text-decoration:none;padding:10px 20px;border:1px solid var(--border);border-radius:3px;transition:all 0.15s;}
+.portal-back:hover{border-color:var(--blue2);color:var(--blue2);}
+
+/* RANKING */
+#screen-ranking{min-height:100vh;padding:40px 20px 60px;}
+.ranking-wrap{max-width:600px;margin:0 auto;}
+.ranking-top{display:flex;align-items:center;gap:12px;margin-bottom:24px;}
+.ranking-title{font-family:'Zen Kaku Gothic New',sans-serif;font-weight:900;font-size:22px;color:var(--gold2);flex:1;}
+.ranking-back{font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--text3);background:none;border:1px solid var(--border);border-radius:3px;padding:6px 14px;cursor:pointer;transition:all 0.15s;}
+.ranking-back:hover{border-color:var(--gold2);color:var(--gold2);}
+.ranking-tabs{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;margin-bottom:20px;border-bottom:1px solid var(--border);}
+.ranking-tabs::-webkit-scrollbar{display:none;}
+.ranking-tab{flex-shrink:0;font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:0.1em;padding:10px 12px;background:none;border:none;border-bottom:2px solid transparent;color:var(--text3);cursor:pointer;transition:all 0.15s;white-space:nowrap;}
+.ranking-tab.active{color:var(--gold2);border-bottom-color:var(--gold2);}
+.ranking-list{display:flex;flex-direction:column;gap:6px;}
+.ranking-empty{font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--text3);text-align:center;padding:32px;letter-spacing:0.1em;}
+.ranking-row{display:flex;align-items:center;gap:12px;background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:12px 16px;}
+.ranking-row.top1{border-color:rgba(245,158,11,0.5);background:rgba(245,158,11,0.06);}
+.ranking-row.top2{border-color:rgba(200,200,200,0.3);background:rgba(200,200,200,0.03);}
+.ranking-row.top3{border-color:rgba(180,100,30,0.35);background:rgba(180,100,30,0.04);}
+.ranking-pos{font-family:'Zen Kaku Gothic New',sans-serif;font-weight:900;font-size:18px;min-width:28px;color:var(--text3);}
+.ranking-pos.gold{color:#f59e0b;}.ranking-pos.silver{color:#9ca3af;}.ranking-pos.bronze{color:#b45309;}
+.ranking-name{flex:1;font-size:14px;font-weight:700;color:var(--text);}
+.ranking-score{font-family:'Zen Kaku Gothic New',sans-serif;font-weight:900;font-size:20px;color:var(--gold2);}
+.ranking-date{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text3);margin-left:6px;}
+.ranking-del{font-size:11px;color:var(--text3);background:none;border:none;cursor:pointer;padding:4px 8px;margin-top:12px;font-family:'Share Tech Mono',monospace;letter-spacing:0.08em;transition:color 0.15s;}
+.ranking-del:hover{color:#ef4444;}
+
+#toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--bg2);color:var(--gold2);font-family:'Share Tech Mono',monospace;font-size:12px;padding:10px 20px;border-radius:6px;border:1px solid var(--gold);z-index:9999;opacity:0;transition:all 0.3s;pointer-events:none;white-space:nowrap;}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+.portal-fixed-btn{position:fixed;bottom:20px;left:20px;z-index:9999;display:inline-flex;align-items:center;gap:8px;padding:10px 18px;background:rgba(10,22,40,0.92);color:var(--blue3);font-family:'Share Tech Mono',monospace;font-size:12px;letter-spacing:0.08em;border-radius:4px;border:1px solid rgba(37,99,235,0.35);text-decoration:none;backdrop-filter:blur(6px);box-shadow:0 4px 16px rgba(0,0,0,0.5);transition:all 0.15s;white-space:nowrap;}
+.portal-fixed-btn:hover{background:rgba(10,22,40,0.98);border-color:rgba(96,165,250,0.7);transform:translateY(-1px);}
+
+@media(max-width:480px){
+  .genres-grid{grid-template-columns:1fr 1fr;}
+  .result-actions{flex-direction:column;}
+  .portal-fixed-btn{bottom:14px;left:14px;padding:8px 14px;font-size:11px;}
+}
+</style>
+</head>
+<body>
+
+<div id="screen-top" class="screen active">
+  <div class="top-hero">
+    <div class="top-eyebrow">Tommy's Quiz Dojo</div>
+    <h1 class="top-title">甲子園<span>クイズ</span>道場</h1>
+    <p class="top-sub">高校野球の歴史・記録・名選手・名勝負を学ぼう！</p>
+    <div class="top-rule">
+      📋 制限時間：<strong>120秒</strong> ／ 各ジャンル<strong>10問</strong>ランダム出題<br>
+      ✅ 正解 → <strong>+10点</strong> ＋ 時間+5秒<br>
+      ❌ 不正解 → 減点なし ＋ 時間−5秒のペナルティ<br>
+      🏆 残り時間がそのままボーナス点に加算！<br>
+      【4択】と【○×】がランダムにミックスされます
+    </div>
+  </div>
+  <div class="genres-wrap">
+    <div class="genres-label">// ジャンルを選んでスタート</div>
+    <div class="genres-hint">👆 カードをクリックするとすぐに始められます</div>
+    <div class="genres-grid" id="genres-grid"></div>
+    <div class="ranking-btn-wrap">
+      <button class="ranking-btn" onclick="showRanking()">🏆 スコアランキングを見る</button>
+    </div>
+  </div>
+</div>
+
+<div id="screen-intro" class="screen">
+  <div class="intro-box">
+    <span class="intro-icon" id="intro-icon"></span>
+    <div class="intro-name" id="intro-name"></div>
+    <div class="intro-desc" id="intro-desc"></div>
+    <div class="intro-rule">
+      制限時間：<strong>120秒</strong> ／ 10問ランダム出題（4択＋○×ミックス）<br>
+      ✅ 正解 → <strong>+10点</strong> ＋ 時間+5秒<br>
+      ❌ 不正解 → 減点なし ＋ 時間−5秒<br>
+      🏆 残り時間がそのままボーナス点に加算
+    </div>
+    <div class="name-label">// Your Name（ランキングに表示）</div>
+    <input class="name-input" id="name-input" type="text" maxlength="20" placeholder="プレーヤー名（任意）">
+    <button class="start-btn" onclick="startGame()">スタート ▶</button>
+    <button class="back-link" onclick="showScreen('screen-top')">← 戻る</button>
+  </div>
+</div>
+
+<div id="screen-quiz" class="screen">
+  <div class="quiz-header">
+    <div class="quiz-qnum" id="quiz-qnum">Q1 / 10</div>
+    <div class="quiz-progress"><div class="quiz-progress-fill" id="quiz-progress-fill" style="width:0%"></div></div>
+    <div class="quiz-score" id="quiz-score">0 pt</div>
+    <div class="quiz-timer-wrap">
+      <div class="quiz-timer" id="quiz-timer">120</div>
+      <div class="quiz-timer-label">秒</div>
+    </div>
+  </div>
+  <div class="quiz-body">
+    <div class="quiz-type-badge" id="quiz-type-badge">4択</div>
+    <div class="quiz-q" id="quiz-q"></div>
+    <div id="quiz-choices"></div>
+    <div class="feedback-bar" id="feedback-bar"></div>
+    <button class="next-btn" id="next-btn" onclick="nextQuestion()">次の問題へ →</button>
+  </div>
+</div>
+
+<div id="screen-result" class="screen">
+  <div class="result-box">
+    <div class="result-genre" id="result-genre"></div>
+    <div class="result-score-wrap">
+      <span class="result-medal" id="result-medal">🏆</span>
+      <div class="result-score" id="result-score">0</div>
+      <div class="result-score-label">TOTAL SCORE</div>
+      <div class="result-stats">
+        <div class="result-stat"><div class="result-stat-val green" id="result-correct">0</div><div class="result-stat-label">正解数</div></div>
+        <div class="result-stat"><div class="result-stat-val" id="result-wrong">0</div><div class="result-stat-label">不正解数</div></div>
+        <div class="result-stat"><div class="result-stat-val gold" id="result-bonus">+0</div><div class="result-stat-label">時間ボーナス</div></div>
+      </div>
+    </div>
+    <div class="result-actions">
+      <button class="result-btn result-btn-primary" onclick="retryGame()">もう一度挑戦</button>
+      <button class="result-btn result-btn-secondary" onclick="showScreen('screen-top')">← トップへ</button>
+    </div>
+  </div>
+  <div class="wrong-section" id="wrong-section"></div>
+  <a class="portal-back" href="https://pecpec37-gift.github.io/portal/">← とみやんのゲームランド</a>
+</div>
+
+<div id="screen-ranking" class="screen">
+  <div class="ranking-wrap">
+    <div class="ranking-top">
+      <div class="ranking-title">🏆 スコアランキング</div>
+      <button class="ranking-back" onclick="showScreen('screen-top')">← トップへ</button>
+    </div>
+    <div class="ranking-tabs" id="ranking-tabs"></div>
+    <div class="ranking-list" id="ranking-list"></div>
+    <div style="text-align:center;margin-top:16px;">
+      <button class="ranking-del" onclick="deleteRanking()">🗑️ このジャンルの記録を削除</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+<a class="portal-fixed-btn" href="https://pecpec37-gift.github.io/portal/">← とみやんのゲームランド</a>
+
+<script>
+const GENRES=[
+  {id:'history', icon:'⚾', name:'歴史・記録',    color:'#1d4ed8', desc:'大会の歴史・最多記録・初の出来事'},
+  {id:'winner',  icon:'🏆', name:'優勝校・名勝負', color:'#d97706', desc:'歴代優勝校・伝説の試合'},
+  {id:'player',  icon:'⭐', name:'名選手',         color:'#059669', desc:'プロで活躍したOB・伝説の選手'},
+  {id:'stadium', icon:'🏟️', name:'甲子園球場',    color:'#7c3aed', desc:'球場の構造・歴史・雑学'},
+  {id:'rule',    icon:'📋', name:'ルール・制度',   color:'#dc2626', desc:'大会ルール・タイブレーク・規定'},
+  {id:'spring',  icon:'🌸', name:'春の選抜',       color:'#db2777', desc:'センバツの歴史・選考・特徴'},
+];
+
+const DB={
+history:[
+  {type:'4',q:'夏の甲子園（全国高校野球選手権大会）が初めて開催されたのは何年か？',c:['1915年','1920年','1905年','1925年'],a:0},
+  {type:'ox',q:'夏の甲子園は毎年8月に開催される。',a:true},
+  {type:'4',q:'夏の甲子園で最多優勝回数を誇る学校はどこか？',c:['中京大中京','大阪桐蔭','PL学園','松山商'],a:0},
+  {type:'ox',q:'1つの大会で最多本塁打記録は松井秀喜が樹立した。',a:false},
+  {type:'4',q:'夏の甲子園が現在の兵庫県西宮市の球場で初めて開催されたのはいつか？',c:['1924年','1915年','1930年','1920年'],a:0},
+  {type:'ox',q:'夏の甲子園は戦時中（太平洋戦争中）に中断された。',a:true},
+  {type:'4',q:'甲子園大会で投手として最多奪三振記録を持つのは誰か？',c:['松坂大輔','江川卓','桑田真澄','斎藤佑樹'],a:1},
+  {type:'ox',q:'夏の甲子園の参加校数は現在4000校を超えている。',a:true},
+  {type:'4',q:'1998年の夏の甲子園で横浜高校が達成した偉業は何か？',c:['春夏連覇','3連覇','全試合完封勝利','ノーヒットノーラン3回'],a:0},
+  {type:'ox',q:'甲子園大会でサヨナラホームランが出た場合、試合はその場で終了する。',a:true},
+  {type:'4',q:'夏の甲子園の最長試合（イニング数）は何回まで続いたか？',c:['延長18回','延長15回','延長20回','延長25回'],a:0},
+  {type:'ox',q:'甲子園大会において、1試合で両チームに退場者が出たことは一度もない。',a:false},
+  {type:'4',q:'夏の甲子園で完全試合を達成した投手の数はこれまで何人いるか？',c:['1人','2人','3人','0人'],a:0},
+  {type:'ox',q:'夏の甲子園は毎年必ず決勝戦まで行われる。',a:false},
+  {type:'4',q:'タイブレーク制度が夏の甲子園で導入されたのはいつからか？',c:['2018年','2015年','2020年','2010年'],a:0},
+  {type:'ox',q:'甲子園大会の試合球には「甲子園」の文字が入っている。',a:true},
+  {type:'4',q:'夏の甲子園で歴代最多の通算勝利数を持つ高校はどこか？',c:['中京大中京','大阪桐蔭','PL学園','松山商業'],a:0},
+  {type:'ox',q:'甲子園球場のグラウンドは人工芝である。',a:false},
+  {type:'4',q:'現在（2020年代）の夏の甲子園の総参加校数として最も近いのはどれか？',c:['約3500校','約1000校','約2000校','約5000校'],a:0},
+  {type:'ox',q:'夏の甲子園において都道府県は全て1代表を出すわけではなく、大阪・神奈川・東京・愛知・兵庫は複数代表枠がある。',a:true},
+  {type:'4',q:'甲子園大会が100回を迎えたのは何年か？',c:['2018年','2015年','2020年','2022年'],a:0},
+  {type:'ox',q:'夏の甲子園の優勝旗は「深紅の大優勝旗」と呼ばれる。',a:true},
+  {type:'4',q:'1969年の夏の甲子園で松山商が三沢高校と引き分け再試合の末に優勝した。この試合の延長は何回か？',c:['延長18回','延長15回','延長20回','延長16回'],a:0},
+  {type:'ox',q:'高校野球には「球数制限」ルールが導入されている。',a:true},
+  {type:'4',q:'夏の甲子園で1大会最多本塁打を記録した選手は誰か？',c:['清原和博','松井秀喜','星稜高校の選手','桑田真澄'],a:0},
+  {type:'ox',q:'夏の甲子園の試合は基本的に無観客で行われる。',a:false},
+  {type:'4',q:'甲子園大会の入場行進曲は毎年どのように選ばれるか？',c:['主催者（朝日新聞社）が選定','投票','前年優勝校が選ぶ','抽選'],a:0},
+  {type:'ox',q:'高校野球の甲子園大会は公益財団法人日本高等学校野球連盟が主催している。',a:true},
+  {type:'4',q:'夏の甲子園において1試合最多得点差で勝利した試合の点差として最も近いのはどれか？',c:['20点以上','10点以上','5点以上','30点以上'],a:0},
+  {type:'ox',q:'甲子園大会では引き分け再試合が廃止され、タイブレークに置き換えられた。',a:true},
+],
+winner:[
+  {type:'4',q:'2023年夏の甲子園で優勝した学校はどこか？',c:['慶応義塾','仙台育英','大阪桐蔭','智辯和歌山'],a:0},
+  {type:'ox',q:'大阪桐蔭は春夏連覇を複数回達成している。',a:true},
+  {type:'4',q:'「平成の怪物」と呼ばれた松坂大輔が甲子園で活躍した学校はどこか？',c:['横浜高校','PL学園','帝京高校','智辯学園'],a:0},
+  {type:'ox',q:'PL学園は2010年代以降も全国大会に出場し続けている。',a:false},
+  {type:'4',q:'2022年夏の甲子園で優勝した学校はどこか？',c:['仙台育英','大阪桐蔭','下関国際','聖光学院'],a:0},
+  {type:'ox',q:'仙台育英が2022年の夏の甲子園で優勝したのは東北勢として初の快挙だった。',a:true},
+  {type:'4',q:'1998年夏の甲子園、延長17回の激闘として知られる準決勝で横浜と対戦した学校はどこか？',c:['PL学園','明徳義塾','星稜高校','智辯学園'],a:2},
+  {type:'ox',q:'1969年の三沢VS松山商の決勝延長18回引き分け再試合は甲子園史に残る名勝負だ。',a:true},
+  {type:'4',q:'「逆転のPL」と呼ばれたPL学園が春夏連覇を初めて達成した年はいつか？',c:['1978年','1985年','1983年','1975年'],a:0},
+  {type:'ox',q:'甲子園で春夏連覇を達成した学校は5校以上ある。',a:true},
+  {type:'4',q:'2006年夏の甲子園で斎藤佑樹（ハンカチ王子）が活躍した学校はどこか？',c:['早稲田実業','慶応義塾','東海大相模','帝京'],a:0},
+  {type:'ox',q:'智辯和歌山は1990年代から2000年代にかけて強豪として知られた。',a:true},
+  {type:'4',q:'2021年夏の甲子園で優勝した学校はどこか？',c:['智辯和歌山','大阪桐蔭','近江','明徳義塾'],a:0},
+  {type:'ox',q:'作新学院は栃木県の高校で夏の甲子園を制したことがある。',a:true},
+  {type:'4',q:'「コールド負けなし」「決勝での逆転勝利が多い」として語り継がれるチームとして有名なのはどれか？',c:['PL学園','智辯和歌山','横浜','大阪桐蔭'],a:0},
+  {type:'ox',q:'夏の甲子園で同一都道府県からの決勝進出（同一県対決）は過去に例がない。',a:false},
+  {type:'4',q:'1998年の横浜高校の主将・主将投手として春夏連覇を達成した松坂大輔の登板イニング数は決勝まで何イニング以上か？',c:['60イニング以上','40イニング以上','80イニング以上','30イニング以上'],a:0},
+  {type:'ox',q:'慶応義塾高校の2023年優勝は同校にとって初の夏の甲子園優勝だった。',a:false},
+  {type:'4',q:'2020年夏の甲子園はどうなったか？',c:['新型コロナウイルスの影響で中止','無観客で開催','縮小して開催','通常通り開催'],a:0},
+  {type:'ox',q:'高校野球の強豪として「私立の壁」という言葉があるように、公立高校が近年甲子園で優勝することは非常に難しくなっている。',a:true},
+  {type:'4',q:'2019年夏の甲子園で優勝した学校はどこか？',c:['履正社','星稜','八戸学院光星','明石商'],a:0},
+  {type:'ox',q:'東北高校は夏の甲子園で優勝したことがある。',a:false},
+  {type:'4',q:'「やまびこ打線」で1990年代に活躍した学校はどこか？',c:['池田高校','PL学園','横浜高校','明徳義塾'],a:0},
+  {type:'ox',q:'池田高校の「やまびこ打線」は1982年・1983年に夏の甲子園を連覇した。',a:true},
+  {type:'4',q:'初出場で夏の甲子園優勝を果たした最も近い例として2010年代に挙げられるのはどれか？',c:['光星学院（2011年準優勝）','前橋育英（2013年）','唐津商業','二松学舎'],a:1},
+],
+player:[
+  {type:'4',q:'「平成の怪物」と呼ばれたプロ野球選手で甲子園で活躍したのは誰か？',c:['松坂大輔','斎藤佑樹','田中将大','ダルビッシュ有'],a:0},
+  {type:'ox',q:'清原和博はPL学園在学中に甲子園で通算13本塁打を放ちPL学園の優勝に貢献した。',a:true},
+  {type:'4',q:'2006年夏に「ハンカチ王子」として話題になった選手は誰か？',c:['斎藤佑樹','田中将大','前田健太','大谷翔平'],a:0},
+  {type:'ox',q:'田中将大は駒大苫小牧のエースとして甲子園で活躍した。',a:true},
+  {type:'4',q:'甲子園で「怪物」と呼ばれ後にプロで大活躍した江川卓が在籍した高校はどこか？',c:['作新学院','PL学園','横浜商','池田'],a:0},
+  {type:'ox',q:'大谷翔平は岩手県の花巻東高校出身で甲子園にも出場した。',a:true},
+  {type:'4',q:'甲子園出場後にメジャーリーガーとして活躍したダルビッシュ有の出身高校はどこか？',c:['東北高校','横浜高校','帝京高校','PL学園'],a:0},
+  {type:'ox',q:'松井秀喜は明徳義塾との試合で5打席連続敬遠を受けた。',a:true},
+  {type:'4',q:'松井秀喜が甲子園で5打席連続敬遠を受けた際の所属高校はどこか？',c:['星稜高校','石川県立金沢高校','遊学館高校','小松大谷'],a:0},
+  {type:'ox',q:'桑田真澄と清原和博は同じPL学園のチームメイトだった。',a:true},
+  {type:'4',q:'甲子園での活躍後にメジャーリーグで最多勝を獲得した前田健太の出身高校はどこか？',c:['PL学園','大阪桐蔭','近大附','履正社'],a:0},
+  {type:'ox',q:'斎藤佑樹は2006年夏の甲子園で「ハンカチ」でふく姿がテレビに映り話題になった。',a:true},
+  {type:'4',q:'甲子園出場経験を持つ現役メジャーリーガーの佐々木朗希の出身高校はどこか？',c:['大船渡高校','盛岡大附','花巻東','一関学院'],a:0},
+  {type:'ox',q:'荒木大輔は1980年代に「アラキング」として甲子園で人気を集めた選手だ。',a:true},
+  {type:'4',q:'1980年代にPL学園で活躍し、後に阪神タイガースで活躍した「KKコンビ」のKKとは誰と誰か？',c:['桑田真澄・清原和博','金子・川上','岸・久保','香田・木戸'],a:0},
+  {type:'ox',q:'工藤公康は甲子園出場経験を持ち、後にプロ野球で長く活躍した。',a:true},
+  {type:'4',q:'2010年代に花巻東の大谷翔平が甲子園で注目された理由として最も適切なのはどれか？',c:['投打の二刀流','打撃の豪快さのみ','球速160km/hを超えた','変化球の多彩さ'],a:0},
+  {type:'ox',q:'高橋由伸は桐蔭学園出身で甲子園に出場した経験がある。',a:true},
+  {type:'4',q:'「銚子商業・土屋」や「作新学院・江川」などが活躍したのはいつの時代か？',c:['1970年代','1960年代','1990年代','1980年代'],a:0},
+  {type:'ox',q:'マーくん（田中将大）と斎藤佑樹は2006年夏の甲子園決勝・再試合で対戦した。',a:true},
+  {type:'4',q:'甲子園での最速球速記録（公式）として知られるのは誰の記録か？',c:['大谷翔平','松坂大輔','佐々木朗希','吉田輝星'],a:0},
+  {type:'ox',q:'吉田輝星は金足農業の投手として2018年夏の甲子園を沸かせた。',a:true},
+  {type:'4',q:'「甲子園のアイドル」として1983年夏に人気を集めた荒木大輔の出身校はどこか？',c:['早稲田実業','慶応義塾','帝京','桐光学園'],a:0},
+  {type:'ox',q:'現役プロ野球選手の多くが甲子園出場経験者である。',a:true},
+  {type:'4',q:'2018年夏の甲子園で金足農業のエースとして活躍した吉田輝星は秋田県出身だが、金足農業はどこの県か？',c:['秋田県','岩手県','山形県','宮城県'],a:0},
+],
+stadium:[
+  {type:'4',q:'甲子園球場の正式名称は何か？',c:['阪神甲子園球場','甲子園野球場','兵庫甲子園スタジアム','甲子園ボールパーク'],a:0},
+  {type:'ox',q:'甲子園球場は兵庫県西宮市に位置する。',a:true},
+  {type:'4',q:'甲子園球場が完成したのは何年か？',c:['1924年','1915年','1930年','1920年'],a:0},
+  {type:'ox',q:'甲子園球場はプロ野球・阪神タイガースのホームグラウンドでもある。',a:true},
+  {type:'4',q:'甲子園球場の収容人数として最も近いのはどれか？',c:['約47000人','約30000人','約60000人','約20000人'],a:0},
+  {type:'ox',q:'甲子園球場の外野フェンスにはツタが生えていることで有名だ。',a:true},
+  {type:'4',q:'甲子園球場の名前の由来は何か？',c:['1924年（甲子年）に完成したため','甲子という名の人物が建設した','甲子という地名がある','甲と子を合わせた縁起の良い名前'],a:0},
+  {type:'ox',q:'甲子園球場は国の重要文化財に指定されている。',a:false},
+  {type:'4',q:'甲子園球場の外野に生えているツタの種類はどれか？',c:['アメリカヅタ','ヘデラ','フジ','キヅタ'],a:0},
+  {type:'ox',q:'甲子園球場では試合前に選手がグラウンドの土を持ち帰る慣習がある。',a:true},
+  {type:'4',q:'甲子園球場の内野グラウンドの土の色が独特な理由は何か？',c:['黒土と白砂を混合した特殊な土を使用しているため','花崗岩を砕いたものを使用','粘土質の土を使用','人工的に着色された土'],a:0},
+  {type:'ox',q:'甲子園球場は増改築を経て現在の形になった。',a:true},
+  {type:'4',q:'甲子園球場がリニューアル工事を行ったのはいつ頃か？',c:['2007〜2010年頃','1990年代','2000年初頭','2015年以降'],a:0},
+  {type:'ox',q:'甲子園球場には天然芝のグラウンドが使用されている。',a:true},
+  {type:'4',q:'甲子園の「銀傘」とは何か？',c:['内野スタンドを覆う屋根','外野フェンスの色','電光掲示板の愛称','グラウンドに敷かれる防水シート'],a:0},
+  {type:'ox',q:'甲子園球場の照明はLED化されている。',a:true},
+  {type:'4',q:'甲子園球場は海抜何メートルほどのところに位置するか？',c:['ほぼ0m（海抜数m）','50m以上','100m以上','20〜30m'],a:0},
+  {type:'ox',q:'甲子園球場周辺には甲子園駅（阪神電鉄）がある。',a:true},
+  {type:'4',q:'高校野球で選手が試合後に行う有名な行動はどれか？',c:['グラウンドの土を袋に入れて持ち帰る','スパイクを脱いでグラウンドに置く','ユニフォームを交換する','ホームベースにキスをする'],a:0},
+  {type:'ox',q:'甲子園球場は球場の老朽化に伴い一度取り壊されて新築された。',a:false},
+  {type:'4',q:'甲子園球場の外野スタンドの特徴として有名なのはどれか？',c:['アルプスと呼ばれる応援席がある','全席指定席','外野は常に無料開放','ビジョンがない'],a:0},
+  {type:'ox',q:'甲子園球場のレフトとライトのポール際の距離は同じだ。',a:true},
+  {type:'4',q:'甲子園球場のセンターまでの距離として最も近いのはどれか？',c:['120m','100m','130m','110m'],a:0},
+  {type:'ox',q:'甲子園球場では高校野球以外にも社会人野球の試合なども開催される。',a:true},
+  {type:'4',q:'甲子園球場のツタが撤去・植え替えが行われた大規模改修が行われた時期はいつか？',c:['2007〜2010年','2000〜2003年','2015〜2018年','1995〜1998年'],a:0},
+],
+rule:[
+  {type:'4',q:'高校野球の試合で1イニングに同一打者が2回打席に立つことはあるか？',c:['ある（満塁などでの打順一巡）','絶対にない','延長戦のみある','タイブレーク時のみある'],a:0},
+  {type:'ox',q:'高校野球では投手の1試合あたりの球数制限がある。',a:true},
+  {type:'4',q:'現在の高校野球の球数制限は1週間で何球以内か？',c:['500球','300球','400球','600球'],a:0},
+  {type:'ox',q:'甲子園大会では延長タイブレークから無死一・二塁で始まる。',a:true},
+  {type:'4',q:'高校野球で「タイブレーク」が始まるのは延長何回からか？',c:['延長13回から','延長10回から','延長15回から','延長12回から'],a:0},
+  {type:'ox',q:'高校野球では試合中のヘルメット着用が義務付けられている。',a:true},
+  {type:'4',q:'甲子園大会の予選（地方大会）の期間として一般的なのはどれか？',c:['約1ヶ月間（6月〜7月）','2週間程度','2ヶ月以上','1週間程度'],a:0},
+  {type:'ox',q:'高校野球では木製バットと金属バットの両方が使用可能だ。',a:false},
+  {type:'4',q:'甲子園大会のトーナメント形式として正しいのはどれか？',c:['完全トーナメント（一発勝負）','グループリーグ後トーナメント','ダブルエリミネーション','リーグ戦のみ'],a:0},
+  {type:'ox',q:'高校野球の試合では監督がコーチャーボックスに立つことができる。',a:true},
+  {type:'4',q:'高校野球の金属バット使用が正式に認められたのはいつか？',c:['1974年','1960年','1985年','1990年'],a:0},
+  {type:'ox',q:'高校野球では登録メンバー以外の選手が試合に出場することはできない。',a:true},
+  {type:'4',q:'甲子園大会の試合における雨天中止の場合、翌日以降に何が行われるか？',c:['ノーゲームとなり翌日再試合','そのスコアで試合成立','コールドゲームが適用','引き分け'],a:0},
+  {type:'ox',q:'高校野球では投手が打者として打席に立つことはない（DH制の場合）。',a:false},
+  {type:'4',q:'甲子園大会の組み合わせ抽選はいつ行われるか？',c:['大会開幕数日前','開幕1ヶ月前','開幕前日','予選終了直後'],a:0},
+  {type:'ox',q:'高校野球の試合では整列・礼を試合前後に行うことが義務付けられている。',a:true},
+  {type:'4',q:'1試合の球数制限（1日）として現在定められているのはどれか？',c:['1日100球以内','1日150球以内','1日80球以内','制限なし'],a:0},
+  {type:'ox',q:'甲子園大会ではサスペンデッドゲーム（一時停止試合）制度がある。',a:true},
+  {type:'4',q:'高校野球の登録選手数の上限として正しいのはどれか？',c:['20名','15名','25名','18名'],a:0},
+  {type:'ox',q:'甲子園大会において審判員はプロ野球審判員が担当する。',a:false},
+  {type:'4',q:'高校野球の試合で「没収試合」が宣告される場合はどれか？',c:['選手が整列を拒否した場合','雨天中断が3時間を超えた場合','コールドゲームの基準に達した場合','得点差が10点以上になった場合'],a:0},
+  {type:'ox',q:'高校野球では試合中に監督がグラウンドに出てきて審判に抗議することができる。',a:true},
+  {type:'4',q:'甲子園の夏の大会で「コールドゲーム」の規定はあるか？',c:['ない（最後まで試合する）','5回終了後10点差以上','7回終了後7点差以上','3回終了後15点差以上'],a:0},
+  {type:'ox',q:'高校野球の投手は試合中に別のポジションに移り、またマウンドに戻ることができない。',a:true},
+  {type:'4',q:'甲子園大会参加のための条件として必須なのはどれか？',c:['都道府県予選を勝ち抜く','推薦（選抜）','監督の資格取得','部員20名以上'],a:0},
+],
+spring:[
+  {type:'4',q:'春の選抜（センバツ）の正式名称は何か？',c:['選抜高等学校野球大会','春季全国高校野球大会','高校選抜野球甲子園大会','全国選抜高校野球選手権大会'],a:0},
+  {type:'ox',q:'センバツは出場校が選考委員会によって選ばれる。',a:true},
+  {type:'4',q:'センバツの出場校は主に何をもとに選ばれるか？',c:['前年秋の地区大会の成績','夏の甲子園の成績','春季大会の成績','アンケート'],a:0},
+  {type:'ox',q:'センバツは毎年3月下旬〜4月に開催される。',a:true},
+  {type:'4',q:'センバツの出場校数は何校か？（近年）',c:['32校','20校','16校','24校'],a:0},
+  {type:'ox',q:'センバツは夏の大会と異なり、招待制（選考による）である。',a:true},
+  {type:'4',q:'センバツが初めて開催されたのはいつか？',c:['1924年','1915年','1930年','1920年'],a:0},
+  {type:'ox',q:'センバツの主催は毎日新聞社と日本高等学校野球連盟だ。',a:true},
+  {type:'4',q:'センバツ優勝旗の色はどれか？',c:['白','赤（深紅）','青','金'],a:0},
+  {type:'ox',q:'センバツには「21世紀枠」という特別選考枠がある。',a:true},
+  {type:'4',q:'「21世紀枠」とはどのような学校に与えられる枠か？',c:['困難な条件下でも実績を残した学校','21世紀に創立された学校','IT教育に力を入れている学校','新興の強豪校'],a:0},
+  {type:'ox',q:'センバツで優勝した学校は同じ年の夏の甲子園にも自動出場できる。',a:false},
+  {type:'4',q:'センバツの最多優勝校はどこか？',c:['中京大中京','大阪桐蔭','報徳学園','PL学園'],a:0},
+  {type:'ox',q:'センバツでは過去に春夏連覇（センバツ優勝後に夏も優勝）した学校がある。',a:true},
+  {type:'4',q:'センバツで春夏連覇を最初に達成した学校はどこか？',c:['中京商（現中京大中京）','PL学園','池田','横浜'],a:0},
+  {type:'ox',q:'センバツの選考は各地区の審査員が行い、最終的に選考委員会が決定する。',a:true},
+  {type:'4',q:'センバツの試合球と夏の甲子園の試合球は同じメーカーが提供しているか？',c:['同じ（ミズノ社）','異なる','年によって変わる','どちらもアシックス'],a:0},
+  {type:'ox',q:'センバツでは1年生が選手として出場することが可能だ。',a:true},
+  {type:'4',q:'センバツで「明治神宮大会優勝校」への出場枠はどの地区に加えられるか？',c:['優勝校の地区に1枠追加','関東・東京地区に自動追加','全地区に1枠ずつ追加','特別枠として独立'],a:0},
+  {type:'ox',q:'センバツは夏の甲子園と同じ球場（甲子園）で開催される。',a:true},
+  {type:'4',q:'センバツの試合形式はどれか？',c:['完全トーナメント','リーグ戦のちトーナメント','ダブルエリミネーション','グループステージあり'],a:0},
+  {type:'ox',q:'センバツは夏の選手権と比べて球数制限が緩い。',a:false},
+  {type:'4',q:'センバツに出場するために必要な秋季大会の最低条件として一般的なのはどれか？',c:['地区大会ベスト8程度以上','優勝のみ','ベスト4以上','ベスト16以上'],a:0},
+  {type:'ox',q:'センバツでも選手はグラウンドの土を持ち帰ることができる。',a:true},
+  {type:'4',q:'2024年のセンバツで優勝した学校はどこか？',c:['健大高崎','星稜','報徳学園','大阪桐蔭'],a:0},
+],
+};
+
+let currentGenre=null,questions=[],qIndex=0,score=0,correctCount=0,wrongCount=0;
+let timeLeft=120,timer=null,answered=false,wrongAnswers=[],playerName='';
+let currentRankingGenre=null;
+
+function shuffle(arr){const a=[...arr];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');window.scrollTo(0,0);}
+function showToast(msg,d=2500){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),d);}
+
+function buildGenreCards(){
+  const grid=document.getElementById('genres-grid');
+  grid.innerHTML=GENRES.map(g=>`
+    <div class="genre-card" onclick="selectGenre('${g.id}')">
+      <div class="genre-accent" style="background:${g.color};"></div>
+      <span class="genre-icon">${g.icon}</span>
+      <div class="genre-name">${g.name}</div>
+      <div class="genre-desc">${g.desc}</div>
+      <div class="genre-count">全${DB[g.id].length}問収録 ／ 10問ランダム出題</div>
+      <span class="genre-start">▶ START</span>
+    </div>`).join('');
+}
+
+function selectGenre(id){
+  currentGenre=GENRES.find(g=>g.id===id);
+  document.getElementById('intro-icon').textContent=currentGenre.icon;
+  document.getElementById('intro-name').textContent=currentGenre.name;
+  document.getElementById('intro-desc').textContent=currentGenre.desc;
+  if(window.TomyStamp){const saved=TomyStamp.getPlayer();const inp=document.getElementById('name-input');if(saved&&!inp.value)inp.value=saved;}
+  showScreen('screen-intro');
+}
+
+function startGame(){
+  playerName=document.getElementById('name-input').value.trim()||'ゲスト';
+  if(window.TomyStamp&&playerName!=='ゲスト')TomyStamp.setPlayer(playerName);
+  questions=shuffle(DB[currentGenre.id]).slice(0,10);
+  qIndex=0;score=0;correctCount=0;wrongCount=0;wrongAnswers=[];
+  showScreen('screen-quiz');showQuestion();startTimer();
+}
+function retryGame(){showScreen('screen-intro');}
+
+function startTimer(){
+  clearInterval(timer);timeLeft=120;updateTimerDisplay();
+  timer=setInterval(()=>{timeLeft--;updateTimerDisplay();if(timeLeft<=0){clearInterval(timer);endGame();}},1000);
+}
+function updateTimerDisplay(){
+  const el=document.getElementById('quiz-timer');
+  el.textContent=timeLeft;
+  el.className='quiz-timer'+(timeLeft<=10?' danger':'');
+}
+
+function showQuestion(){
+  const q=questions[qIndex];answered=false;
+  document.getElementById('quiz-qnum').textContent=`Q${qIndex+1} / 10`;
+  document.getElementById('quiz-progress-fill').style.width=`${(qIndex/10)*100}%`;
+  document.getElementById('quiz-score').textContent=`${score} pt`;
+  document.getElementById('feedback-bar').className='feedback-bar';
+  document.getElementById('feedback-bar').textContent='';
+  document.getElementById('next-btn').className='next-btn';
+  if(q.type==='4'){
+    document.getElementById('quiz-type-badge').textContent='4択';
+    document.getElementById('quiz-type-badge').className='quiz-type-badge type-4';
+    document.getElementById('quiz-q').textContent=q.q;
+    const lb=['A','B','C','D'];
+    document.getElementById('quiz-choices').innerHTML=q.c.map((c,i)=>
+      `<button class="choice-btn" onclick="answer4(${i})"><span class="choice-label">${lb[i]}</span>${c}</button>`
+    ).join('');
+  }else{
+    document.getElementById('quiz-type-badge').textContent='○×';
+    document.getElementById('quiz-type-badge').className='quiz-type-badge type-ox';
+    document.getElementById('quiz-q').textContent=q.q;
+    document.getElementById('quiz-choices').innerHTML=`<div class="ox-choices">
+      <button class="ox-btn" onclick="answerOX(true)">⭕<span>正しい</span></button>
+      <button class="ox-btn" onclick="answerOX(false)">❌<span>誤り</span></button>
+    </div>`;
+  }
+}
+
+function answer4(idx){
+  if(answered)return;answered=true;
+  const q=questions[qIndex];
+  const btns=document.querySelectorAll('.choice-btn');
+  btns.forEach(b=>b.disabled=true);
+  btns[q.a].classList.add('correct');
+  if(idx!==q.a)btns[idx].classList.add('wrong');
+  processAnswer(idx===q.a,q.c[q.a],q.q);
+}
+function answerOX(val){
+  if(answered)return;answered=true;
+  const q=questions[qIndex];
+  const btns=document.querySelectorAll('.ox-btn');
+  btns.forEach(b=>b.disabled=true);
+  btns[q.a?0:1].classList.add('correct');
+  if(val!==q.a)btns[val?0:1].classList.add('wrong');
+  processAnswer(val===q.a,q.a?'○（正しい）':'×（誤り）',q.q);
+}
+
+function processAnswer(isCorrect,correctAns,qText){
+  const fb=document.getElementById('feedback-bar');
+  if(isCorrect){
+    score+=10;correctCount++;timeLeft=Math.min(timeLeft+5,999);
+    fb.textContent='✅ 正解！ ＋5秒';fb.className='feedback-bar ok show';
+  }else{
+    wrongCount++;timeLeft=Math.max(timeLeft-5,0);
+    fb.textContent=`❌ 正解は「${correctAns}」（−5秒）`;fb.className='feedback-bar ng show';
+    wrongAnswers.push({q:qText,a:correctAns});
+  }
+  updateTimerDisplay();
+  document.getElementById('next-btn').className='next-btn show';
+}
+
+function nextQuestion(){qIndex++;if(qIndex>=10){clearInterval(timer);endGame();}else{showQuestion();}}
+
+function endGame(){
+  clearInterval(timer);
+  const bonus=Math.max(timeLeft,0),total=score+bonus;
+  const medal=correctCount>=9?'🥇':correctCount>=7?'🥈':correctCount>=5?'🥉':'😅';
+  document.getElementById('result-genre').textContent=currentGenre.icon+' '+currentGenre.name;
+  document.getElementById('result-score').textContent=total;
+  document.getElementById('result-medal').textContent=medal;
+  document.getElementById('result-correct').textContent=correctCount;
+  document.getElementById('result-wrong').textContent=wrongCount;
+  document.getElementById('result-bonus').textContent='+'+bonus;
+
+  const ws=document.getElementById('wrong-section');
+  if(wrongAnswers.length>0){
+    ws.innerHTML=`<div class="wrong-label">// ❌ 間違えた問題（${wrongAnswers.length}問）</div>`+
+      wrongAnswers.map((w,i)=>`<div class="wrong-item">
+        <div class="wrong-item-num">問${i+1}</div>
+        <div class="wrong-item-q">${w.q}</div>
+        <div class="wrong-item-ans"><span class="wrong-item-ans-label">正解</span><span class="wrong-item-ans-text">${w.a}</span></div>
+      </div>`).join('');
+  }else{
+    ws.innerHTML='<div style="text-align:center;padding:20px;font-family:\'Share Tech Mono\',monospace;font-size:12px;color:var(--gold2);">🎉 全問正解！</div>';
+  }
+
+  saveRanking(currentGenre.id,playerName,total,correctCount);
+  if(window.TomyStamp&&playerName!=='ゲスト'){
+    TomyStamp.send('koshien-quiz',currentGenre.name,correctCount).then(r=>{
+      if(r.ok)showToast('⭐ スタンプ獲得！ランキングに反映されます');
+    });
+  }
+  showScreen('screen-result');
+}
+
+const LS_KEY='koshien_quiz_ranking';
+function saveRanking(gId,name,sc,correct){
+  const data=JSON.parse(localStorage.getItem(LS_KEY)||'{}');
+  if(!data[gId])data[gId]=[];
+  data[gId].push({name,score:sc,correct,date:new Date().toLocaleDateString('ja-JP')});
+  data[gId].sort((a,b)=>b.score-a.score);
+  data[gId]=data[gId].slice(0,20);
+  localStorage.setItem(LS_KEY,JSON.stringify(data));
+}
+
+function showRanking(){
+  const tabs=document.getElementById('ranking-tabs');
+  tabs.innerHTML=GENRES.map(g=>`<button class="ranking-tab" onclick="switchRankingTab('${g.id}',this)">${g.icon} ${g.name}</button>`).join('');
+  showScreen('screen-ranking');
+  switchRankingTab(GENRES[0].id,tabs.querySelector('.ranking-tab'));
+}
+function switchRankingTab(id,btn){
+  document.querySelectorAll('.ranking-tab').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+  currentRankingGenre=id;renderRanking(id);
+}
+function renderRanking(id){
+  const data=JSON.parse(localStorage.getItem(LS_KEY)||'{}');
+  const rows=data[id]||[];
+  const list=document.getElementById('ranking-list');
+  if(!rows.length){list.innerHTML='<div class="ranking-empty">// まだ記録がありません</div>';return;}
+  list.innerHTML=rows.map((r,i)=>{
+    const pos=i+1,pc=pos===1?'gold':pos===2?'silver':pos===3?'bronze':'';
+    const rc=pos===1?'top1':pos===2?'top2':pos===3?'top3':'';
+    return `<div class="ranking-row ${rc}">
+      <span class="ranking-pos ${pc}">${pos}</span>
+      <span class="ranking-name">${r.name}</span>
+      <span style="font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--text3);">${r.correct}/10</span>
+      <span class="ranking-score">${r.score}</span>
+      <span class="ranking-date">${r.date}</span>
+    </div>`;
+  }).join('');
+}
+function deleteRanking(){
+  if(!currentRankingGenre)return;
+  if(!confirm(`「${GENRES.find(g=>g.id===currentRankingGenre)?.name}」の記録を削除しますか？`))return;
+  const data=JSON.parse(localStorage.getItem(LS_KEY)||'{}');
+  delete data[currentRankingGenre];
+  localStorage.setItem(LS_KEY,JSON.stringify(data));
+  renderRanking(currentRankingGenre);
+}
+
+buildGenreCards();
+</script>
+</body>
+</html>
