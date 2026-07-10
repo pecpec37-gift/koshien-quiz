@@ -55,6 +55,9 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 .genre-count{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text3);letter-spacing:0.1em;}
 .genre-start{position:absolute;top:14px;right:14px;font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:0.1em;color:var(--blue2);opacity:0;transition:opacity 0.15s;}
 .genre-card:hover .genre-start{opacity:1;}
+.genre-card.random{grid-column:1/-1;background:linear-gradient(135deg,rgba(245,158,11,0.12),rgba(37,99,235,0.1));border-color:rgba(245,158,11,0.35);}
+.genre-card.random .genre-name{color:var(--gold2);}
+.genre-card.random .genre-icon{filter:drop-shadow(0 2px 6px rgba(245,158,11,0.4));}
 
 .ranking-btn-wrap{text-align:center;padding:8px 0 36px;}
 .ranking-btn{font-family:'Share Tech Mono',monospace;font-size:11px;letter-spacing:0.12em;padding:10px 24px;background:none;border:1px solid var(--border);color:var(--text3);border-radius:3px;cursor:pointer;transition:all 0.15s;}
@@ -346,6 +349,12 @@ const GENRES=[
   {id:'rule',    icon:'📋', name:'ルール・制度',   color:'#dc2626', desc:'大会ルール・タイブレーク・規定'},
   {id:'spring',  icon:'🌸', name:'春の選抜',       color:'#db2777', desc:'センバツの歴史・選考・特徴'},
 ];
+const RANDOM_GENRE={id:'random', icon:'🎲', name:'ランダム', color:'#f59e0b', desc:'全ジャンルからミックスして出題'};
+function genreById(id){return id==='random'?RANDOM_GENRE:GENRES.find(g=>g.id===id);}
+function pool4(id){
+  if(id==='random')return GENRES.reduce((a,g)=>a.concat(DB[g.id]),[]).filter(q=>q.type==='4');
+  return DB[id].filter(q=>q.type==='4');
+}
 
 const DB={
 history:[
@@ -528,7 +537,17 @@ function showToast(msg,d=2500){const t=document.getElementById('toast');t.textCo
 
 function buildGenreCards(){
   const grid=document.getElementById('genres-grid');
-  grid.innerHTML=GENRES.map(g=>`
+  const totalCount=pool4('random').length;
+  const randomCard=`
+    <div class="genre-card random" onclick="selectGenre('random')">
+      <div class="genre-accent" style="background:linear-gradient(90deg,#f59e0b,#2563eb,#10b981,#db2777);"></div>
+      <span class="genre-icon">🎲</span>
+      <div class="genre-name">ランダム</div>
+      <div class="genre-desc">全ジャンルからミックスして出題</div>
+      <div class="genre-count">全${totalCount}問から10問ランダム出題</div>
+      <span class="genre-start">▶ START</span>
+    </div>`;
+  grid.innerHTML=randomCard+GENRES.map(g=>`
     <div class="genre-card" onclick="selectGenre('${g.id}')">
       <div class="genre-accent" style="background:${g.color};"></div>
       <span class="genre-icon">${g.icon}</span>
@@ -540,7 +559,7 @@ function buildGenreCards(){
 }
 
 function selectGenre(id){
-  currentGenre=GENRES.find(g=>g.id===id);
+  currentGenre=genreById(id);
   document.getElementById('intro-icon').textContent=currentGenre.icon;
   document.getElementById('intro-name').textContent=currentGenre.name;
   document.getElementById('intro-desc').textContent=currentGenre.desc;
@@ -551,7 +570,7 @@ function selectGenre(id){
 function startGame(){
   playerName=document.getElementById('name-input').value.trim()||'ゲスト';
   if(window.TomyStamp&&playerName!=='ゲスト')TomyStamp.setPlayer(playerName);
-  questions=shuffle(DB[currentGenre.id].filter(q=>q.type==='4')).slice(0,10);
+  questions=shuffle(pool4(currentGenre.id)).slice(0,10);
   qIndex=0;score=0;correctCount=0;wrongCount=0;wrongAnswers=[];
   timeLeft=30;updateTimerDisplay();
   showScreen('screen-quiz');showQuestion();
@@ -719,9 +738,10 @@ function saveRanking(gId,name,sc,correct){
 
 function showRanking(){
   const tabs=document.getElementById('ranking-tabs');
-  tabs.innerHTML=GENRES.map(g=>`<button class="ranking-tab" onclick="switchRankingTab('${g.id}',this)">${g.icon} ${g.name}</button>`).join('');
+  const list=[RANDOM_GENRE].concat(GENRES);
+  tabs.innerHTML=list.map(g=>`<button class="ranking-tab" onclick="switchRankingTab('${g.id}',this)">${g.icon} ${g.name}</button>`).join('');
   showScreen('screen-ranking');
-  switchRankingTab(GENRES[0].id,tabs.querySelector('.ranking-tab'));
+  switchRankingTab(list[0].id,tabs.querySelector('.ranking-tab'));
 }
 function switchRankingTab(id,btn){
   document.querySelectorAll('.ranking-tab').forEach(t=>t.classList.remove('active'));
@@ -747,7 +767,7 @@ function renderRanking(id){
 }
 function deleteRanking(){
   if(!currentRankingGenre)return;
-  if(!confirm(`「${GENRES.find(g=>g.id===currentRankingGenre)?.name}」の記録を削除しますか？`))return;
+  if(!confirm(`「${genreById(currentRankingGenre)?.name}」の記録を削除しますか？`))return;
   const data=JSON.parse(localStorage.getItem(LS_KEY)||'{}');
   delete data[currentRankingGenre];
   localStorage.setItem(LS_KEY,JSON.stringify(data));
