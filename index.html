@@ -99,7 +99,8 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 .quiz-q{font-family:'Zen Kaku Gothic New',sans-serif;font-weight:700;font-size:clamp(16px,4vw,20px);line-height:1.65;margin-bottom:22px;color:var(--text);}
 .choices{display:flex;flex-direction:column;gap:10px;}
 .choice-btn{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 18px;text-align:left;font-family:'Noto Sans JP',sans-serif;font-size:14px;color:var(--text);cursor:pointer;transition:all 0.12s;display:flex;align-items:center;gap:12px;}
-.choice-btn:hover:not(:disabled){background:var(--surface2);border-color:rgba(96,165,250,0.5);transform:translateX(4px);}
+@media(hover:hover) and (pointer:fine){.choice-btn:hover:not(:disabled){background:var(--surface2);border-color:rgba(96,165,250,0.5);transform:translateX(4px);}}
+.choice-btn:focus,.choice-btn:focus-visible{outline:none;}
 .choice-btn:disabled{cursor:default;}
 .choice-btn.correct{background:rgba(16,185,129,0.15);border-color:#10b981;color:#34d399;}
 .choice-btn.wrong{background:rgba(239,68,68,0.12);border-color:#ef4444;color:#f87171;}
@@ -119,6 +120,42 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 .next-btn{margin-top:14px;width:100%;padding:12px;background:var(--blue);color:white;font-family:'Zen Kaku Gothic New',sans-serif;font-weight:900;font-size:15px;border:none;border-radius:6px;cursor:pointer;transition:background 0.15s;display:none;}
 .next-btn.show{display:block;}
 .next-btn:hover{background:#1d4ed8;}
+
+/* 早押しフロー */
+.quiz-q{transition:opacity 0.28s ease;min-height:1.65em;}
+.quiz-q.faded{opacity:0;}
+.quiz-q.hidden{display:none;}
+.quiz-q.typing::after{content:'▍';color:var(--blue2);animation:caret 0.8s step-end infinite;margin-left:1px;font-weight:400;}
+@keyframes caret{50%{opacity:0;}}
+
+.answer-btn{margin-top:8px;width:100%;padding:16px;background:linear-gradient(135deg,var(--gold),#d97706);color:#1a1206;font-family:'Zen Kaku Gothic New',sans-serif;font-weight:900;font-size:18px;letter-spacing:0.08em;border:none;border-radius:8px;cursor:pointer;transition:transform 0.1s,box-shadow 0.15s;box-shadow:0 6px 18px rgba(245,158,11,0.25);display:none;}
+.answer-btn.show{display:block;}
+.answer-btn:active{transform:scale(0.98);}
+.answer-btn:focus,.answer-btn:focus-visible{outline:none;}
+
+#quiz-choices.reveal{animation:choicesIn 0.32s ease;}
+@keyframes choicesIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+
+.result-overlay{position:fixed;inset:0;z-index:1000;display:flex;align-items:center;justify-content:center;padding:24px;background:rgba(5,12,24,0.72);backdrop-filter:blur(3px);opacity:0;pointer-events:none;transition:opacity 0.25s;}
+.result-overlay.show{opacity:1;pointer-events:auto;}
+.ro-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:32px 26px;width:100%;max-width:400px;text-align:center;transform:scale(0.9);transition:transform 0.28s cubic-bezier(0.34,1.56,0.64,1);box-shadow:0 20px 60px rgba(0,0,0,0.6);}
+.result-overlay.show .ro-card{transform:scale(1);}
+.ro-card.ok{border-color:rgba(16,185,129,0.5);}
+.ro-card.ng{border-color:rgba(239,68,68,0.45);}
+.ro-icon{font-size:56px;line-height:1;margin-bottom:6px;}
+.ro-verdict{font-family:'Zen Kaku Gothic New',sans-serif;font-weight:900;font-size:28px;margin-bottom:14px;}
+.ro-card.ok .ro-verdict{color:#34d399;}
+.ro-card.ng .ro-verdict{color:#f87171;}
+.ro-answer{font-size:13px;line-height:1.7;color:var(--text2);background:var(--bg2);border-radius:8px;padding:12px 14px;margin-bottom:20px;text-align:left;}
+.ro-answer b{color:var(--gold2);font-weight:700;}
+.ro-next{width:100%;padding:14px;background:var(--blue);color:white;font-family:'Zen Kaku Gothic New',sans-serif;font-weight:900;font-size:16px;border:none;border-radius:8px;cursor:pointer;transition:background 0.15s,transform 0.1s;letter-spacing:0.04em;}
+.ro-next:active{transform:scale(0.98);}
+.ro-next:focus,.ro-next:focus-visible{outline:none;}
+
+@media(hover:hover) and (pointer:fine){
+  .answer-btn:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(245,158,11,0.35);}
+  .ro-next:hover{background:#1d4ed8;}
+}
 
 /* RESULT */
 #screen-result{min-height:100vh;display:none;flex-direction:column;align-items:center;padding:40px 20px 60px;}
@@ -199,11 +236,11 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
     <h1 class="top-title">甲子園<span>クイズ</span>道場</h1>
     <p class="top-sub">高校野球の歴史・記録・名選手・名勝負を学ぼう！</p>
     <div class="top-rule">
-      📋 制限時間：<strong>120秒</strong> ／ 各ジャンル<strong>10問</strong>ランダム出題<br>
-      ✅ 正解 → <strong>+10点</strong> ＋ 時間+5秒<br>
-      ❌ 不正解 → 減点なし ＋ 時間−5秒のペナルティ<br>
+      ⚡ <strong>早押し4択クイズ</strong>／制限時間：<strong>30秒</strong>／各ジャンル<strong>10問</strong>ランダム出題<br>
+      ✅ 正解 → <strong>+10点</strong> ＋ 時間<strong>+5秒</strong><br>
+      ❌ 不正解 → 減点なし ＋ 時間<strong>−2秒</strong><br>
       🏆 残り時間がそのままボーナス点に加算！<br>
-      【4択】と【○×】がランダムにミックスされます
+      🌸 スコア<strong>100点以上</strong>で花丸スタンプ獲得
     </div>
   </div>
   <div class="genres-wrap">
@@ -222,10 +259,10 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
     <div class="intro-name" id="intro-name"></div>
     <div class="intro-desc" id="intro-desc"></div>
     <div class="intro-rule">
-      制限時間：<strong>120秒</strong> ／ 10問ランダム出題（4択＋○×ミックス）<br>
-      ✅ 正解 → <strong>+10点</strong> ＋ 時間+5秒<br>
-      ❌ 不正解 → 減点なし ＋ 時間−5秒<br>
-      🏆 残り時間がそのままボーナス点に加算
+      ⚡ 早押し4択／制限時間：<strong>30秒</strong>／10問ランダム出題<br>
+      ✅ 正解 → <strong>+10点</strong> ＋ 時間<strong>+5秒</strong><br>
+      ❌ 不正解 → 減点なし ＋ 時間<strong>−2秒</strong><br>
+      🏆 残り時間がボーナス点に加算／🌸 100点以上で花丸
     </div>
     <div class="name-label">// Your Name（ランキングに表示）</div>
     <input class="name-input" id="name-input" type="text" maxlength="20" placeholder="プレーヤー名（任意）">
@@ -240,16 +277,24 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
     <div class="quiz-progress"><div class="quiz-progress-fill" id="quiz-progress-fill" style="width:0%"></div></div>
     <div class="quiz-score" id="quiz-score">0 pt</div>
     <div class="quiz-timer-wrap">
-      <div class="quiz-timer" id="quiz-timer">120</div>
+      <div class="quiz-timer" id="quiz-timer">30</div>
       <div class="quiz-timer-label">秒</div>
     </div>
   </div>
   <div class="quiz-body">
-    <div class="quiz-type-badge" id="quiz-type-badge">4択</div>
+    <div class="quiz-type-badge type-4" id="quiz-type-badge">⚡ 早押し4択</div>
     <div class="quiz-q" id="quiz-q"></div>
+    <button class="answer-btn" id="answer-btn" onclick="goAnswer()">回答する！</button>
     <div id="quiz-choices"></div>
-    <div class="feedback-bar" id="feedback-bar"></div>
-    <button class="next-btn" id="next-btn" onclick="nextQuestion()">次の問題へ →</button>
+  </div>
+</div>
+
+<div id="result-overlay" class="result-overlay">
+  <div class="ro-card" id="ro-card">
+    <div class="ro-icon" id="ro-icon">✅</div>
+    <div class="ro-verdict" id="ro-verdict">正解！</div>
+    <div class="ro-answer" id="ro-answer"></div>
+    <button class="ro-next" onclick="nextQuestion()">次の問題へ →</button>
   </div>
 </div>
 
@@ -473,8 +518,9 @@ spring:[
 };
 
 let currentGenre=null,questions=[],qIndex=0,score=0,correctCount=0,wrongCount=0;
-let timeLeft=120,timer=null,answered=false,wrongAnswers=[],playerName='';
+let timeLeft=30,timer=null,answered=false,wrongAnswers=[],playerName='';
 let currentRankingGenre=null;
+let phase='reading',typewriterTimer=null;
 
 function shuffle(arr){const a=[...arr];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
 function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');window.scrollTo(0,0);}
@@ -488,7 +534,7 @@ function buildGenreCards(){
       <span class="genre-icon">${g.icon}</span>
       <div class="genre-name">${g.name}</div>
       <div class="genre-desc">${g.desc}</div>
-      <div class="genre-count">全${DB[g.id].length}問収録 ／ 10問ランダム出題</div>
+      <div class="genre-count">全${DB[g.id].filter(q=>q.type==='4').length}問収録 ／ 10問ランダム出題</div>
       <span class="genre-start">▶ START</span>
     </div>`).join('');
 }
@@ -505,86 +551,133 @@ function selectGenre(id){
 function startGame(){
   playerName=document.getElementById('name-input').value.trim()||'ゲスト';
   if(window.TomyStamp&&playerName!=='ゲスト')TomyStamp.setPlayer(playerName);
-  questions=shuffle(DB[currentGenre.id]).slice(0,10);
+  questions=shuffle(DB[currentGenre.id].filter(q=>q.type==='4')).slice(0,10);
   qIndex=0;score=0;correctCount=0;wrongCount=0;wrongAnswers=[];
-  showScreen('screen-quiz');showQuestion();startTimer();
+  timeLeft=30;updateTimerDisplay();
+  showScreen('screen-quiz');showQuestion();
 }
 function retryGame(){showScreen('screen-intro');}
 
-function startTimer(){
-  clearInterval(timer);timeLeft=120;updateTimerDisplay();
-  timer=setInterval(()=>{timeLeft--;updateTimerDisplay();if(timeLeft<=0){clearInterval(timer);endGame();}},1000);
+function runTimer(){
+  clearInterval(timer);
+  timer=setInterval(()=>{timeLeft--;updateTimerDisplay();if(timeLeft<=0){clearInterval(timer);timeLeft=0;updateTimerDisplay();endGame();}},1000);
 }
+function pauseTimer(){clearInterval(timer);}
 function updateTimerDisplay(){
   const el=document.getElementById('quiz-timer');
   el.textContent=timeLeft;
   el.className='quiz-timer'+(timeLeft<=10?' danger':'');
 }
 
+const CHOICE_LB=['A','B','C','D'];
+
+function typeQuestion(text){
+  const el=document.getElementById('quiz-q');
+  el.textContent='';el.classList.add('typing');
+  let i=0;clearInterval(typewriterTimer);
+  typewriterTimer=setInterval(()=>{
+    if(i<text.length){el.textContent+=text[i];i++;}
+    else{clearInterval(typewriterTimer);typewriterTimer=null;el.classList.remove('typing');}
+  },120);
+}
+function stopTypewriter(){
+  if(typewriterTimer){clearInterval(typewriterTimer);typewriterTimer=null;}
+  document.getElementById('quiz-q').classList.remove('typing');
+}
+
 function showQuestion(){
-  const q=questions[qIndex];answered=false;
+  const q=questions[qIndex];answered=false;phase='reading';
   document.getElementById('quiz-qnum').textContent=`Q${qIndex+1} / 10`;
   document.getElementById('quiz-progress-fill').style.width=`${(qIndex/10)*100}%`;
   document.getElementById('quiz-score').textContent=`${score} pt`;
-  document.getElementById('feedback-bar').className='feedback-bar';
-  document.getElementById('feedback-bar').textContent='';
-  document.getElementById('next-btn').className='next-btn';
-  if(q.type==='4'){
-    document.getElementById('quiz-type-badge').textContent='4択';
-    document.getElementById('quiz-type-badge').className='quiz-type-badge type-4';
-    document.getElementById('quiz-q').textContent=q.q;
-    const lb=['A','B','C','D'];
-    document.getElementById('quiz-choices').innerHTML=q.c.map((c,i)=>
-      `<button class="choice-btn" onclick="answer4(${i})"><span class="choice-label">${lb[i]}</span>${c}</button>`
-    ).join('');
-  }else{
-    document.getElementById('quiz-type-badge').textContent='○×';
-    document.getElementById('quiz-type-badge').className='quiz-type-badge type-ox';
-    document.getElementById('quiz-q').textContent=q.q;
-    document.getElementById('quiz-choices').innerHTML=`<div class="ox-choices">
-      <button class="ox-btn" onclick="answerOX(true)">⭕<span>正しい</span></button>
-      <button class="ox-btn" onclick="answerOX(false)">❌<span>誤り</span></button>
-    </div>`;
-  }
+  // 問題文をリセットして表示
+  const qEl=document.getElementById('quiz-q');
+  qEl.classList.remove('faded','hidden');
+  document.getElementById('quiz-choices').innerHTML='';
+  document.getElementById('quiz-choices').classList.remove('reveal');
+  document.getElementById('answer-btn').classList.add('show');
+  typeQuestion(q.q);
+  runTimer();
+}
+
+// 「回答する！」→ タイプライター停止 → 問題文フェードアウト非表示 → 4択表示
+function goAnswer(){
+  if(answered||phase!=='reading')return;
+  phase='answering';
+  document.getElementById('answer-btn').blur();
+  document.getElementById('answer-btn').classList.remove('show');
+  stopTypewriter();
+  const qEl=document.getElementById('quiz-q');
+  qEl.classList.add('faded');
+  setTimeout(()=>{
+    qEl.classList.add('hidden');
+    renderChoices();
+  },300);
+}
+
+function renderChoices(){
+  const q=questions[qIndex];
+  const box=document.getElementById('quiz-choices');
+  box.innerHTML=q.c.map((c,i)=>
+    `<button class="choice-btn" onclick="answer4(${i})"><span class="choice-label">${CHOICE_LB[i]}</span>${c}</button>`
+  ).join('');
+  void box.offsetWidth;
+  box.classList.add('reveal');
 }
 
 function answer4(idx){
-  if(answered)return;answered=true;
+  if(answered||phase!=='answering')return;answered=true;phase='revealed';
+  pauseTimer();
   const q=questions[qIndex];
+  const isCorrect=idx===q.a;
   const btns=document.querySelectorAll('.choice-btn');
-  btns.forEach(b=>b.disabled=true);
+  btns.forEach(b=>{b.disabled=true;b.blur();});
   btns[q.a].classList.add('correct');
-  if(idx!==q.a)btns[idx].classList.add('wrong');
-  processAnswer(idx===q.a,q.c[q.a],q.q);
-}
-function answerOX(val){
-  if(answered)return;answered=true;
-  const q=questions[qIndex];
-  const btns=document.querySelectorAll('.ox-btn');
-  btns.forEach(b=>b.disabled=true);
-  btns[q.a?0:1].classList.add('correct');
-  if(val!==q.a)btns[val?0:1].classList.add('wrong');
-  processAnswer(val===q.a,q.a?'○（正しい）':'×（誤り）',q.q);
-}
-
-function processAnswer(isCorrect,correctAns,qText){
-  const fb=document.getElementById('feedback-bar');
+  if(!isCorrect)btns[idx].classList.add('wrong');
+  // 採点
   if(isCorrect){
     score+=10;correctCount++;timeLeft=Math.min(timeLeft+5,999);
-    fb.textContent='✅ 正解！ ＋5秒';fb.className='feedback-bar ok show';
   }else{
-    wrongCount++;timeLeft=Math.max(timeLeft-5,0);
-    fb.textContent=`❌ 正解は「${correctAns}」（−5秒）`;fb.className='feedback-bar ng show';
-    wrongAnswers.push({q:qText,a:correctAns});
+    wrongCount++;timeLeft=Math.max(timeLeft-2,0);
+    wrongAnswers.push({q:q.q,a:q.c[q.a]});
   }
   updateTimerDisplay();
-  document.getElementById('next-btn').className='next-btn show';
+  document.getElementById('quiz-score').textContent=`${score} pt`;
+  // 問題文を全文でフェードイン再表示
+  const qEl=document.getElementById('quiz-q');
+  qEl.textContent=q.q;
+  qEl.classList.remove('hidden');
+  requestAnimationFrame(()=>requestAnimationFrame(()=>qEl.classList.remove('faded')));
+  // 0.6秒後に正誤オーバーレイ＋トースト
+  setTimeout(()=>showResult(isCorrect,q.c[q.a]),600);
 }
 
-function nextQuestion(){qIndex++;if(qIndex>=10){clearInterval(timer);endGame();}else{showQuestion();}}
+function showResult(isCorrect,correctAns){
+  document.getElementById('ro-icon').textContent=isCorrect?'✅':'❌';
+  document.getElementById('ro-verdict').textContent=isCorrect?'正解！':'不正解';
+  document.getElementById('ro-answer').innerHTML=isCorrect
+    ? `正解は <b>${correctAns}</b><br>＋10点 ／ 時間 <b>＋5秒</b>`
+    : `正解は <b>${correctAns}</b><br>減点なし ／ 時間 <b>−2秒</b>`;
+  document.getElementById('ro-card').className='ro-card '+(isCorrect?'ok':'ng');
+  document.getElementById('result-overlay').classList.add('show');
+  // トースト
+  const t=document.getElementById('toast');
+  t.textContent=isCorrect?'✅ 正解！+10点+5秒':'❌ 不正解 −2秒';
+  t.classList.add('show');
+}
+
+// 「次の問題へ」→ トーストが消える → 次へ
+function nextQuestion(){
+  document.getElementById('toast').classList.remove('show');
+  document.getElementById('result-overlay').classList.remove('show');
+  qIndex++;
+  if(qIndex>=10){pauseTimer();endGame();}else{showQuestion();}
+}
 
 function endGame(){
-  clearInterval(timer);
+  clearInterval(timer);stopTypewriter();
+  document.getElementById('result-overlay').classList.remove('show');
+  document.getElementById('toast').classList.remove('show');
   const bonus=Math.max(timeLeft,0),total=score+bonus;
   const medal=correctCount>=9?'🥇':correctCount>=7?'🥈':correctCount>=5?'🥉':'😅';
   document.getElementById('result-genre').textContent=currentGenre.icon+' '+currentGenre.name;
@@ -607,10 +700,9 @@ function endGame(){
   }
 
   saveRanking(currentGenre.id,playerName,total,correctCount);
-  if(window.TomyStamp&&playerName!=='ゲスト'){
-    TomyStamp.send('koshien-quiz',currentGenre.name,correctCount).then(r=>{
-      if(r.ok)showToast('⭐ スタンプ獲得！ランキングに反映されます');
-    });
+  // スコア（合計）100点以上で花丸スタンプ獲得
+  if(window.TomyStamp&&playerName!=='ゲスト'&&total>=100){
+    TomyStamp.send('koshien-quiz',currentGenre.name,Math.max(correctCount,9));
   }
   showScreen('screen-result');
 }
